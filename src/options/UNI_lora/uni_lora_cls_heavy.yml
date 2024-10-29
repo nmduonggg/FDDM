@@ -1,0 +1,79 @@
+name: UNI_lora_cls
+gpu_ids: [0]
+job_dir: exp_cls_256_cls_retrain_with9_case68
+token: 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
+
+network_G:
+  which_model_G: uni_lora_cls
+  in_nc: 3
+  out_nc: 7
+
+datasets:
+  train:
+    type: train
+    name: Osteosarcoma
+    mode: classification
+    image_dir: /home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/training_data_256_case68/images
+    label_map: /home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/dataset_split_256_case68.json
+    label_dir: /home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/training_data_256_case68/labels
+    height: 1024
+    width: 1024
+    batch_size: 256
+    balance: False
+    augment: True
+    n_workers: 2
+
+  valid:
+    type: valid
+    name: Osteosarcoma
+    mode: classification
+    image_dir: /home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/training_data_256_case68/images
+    label_map: /home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/dataset_split_256_case68.json
+    label_dir: /home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/training_data_256_case68/labels
+    height: 1024
+    width: 1024
+    batch_size: 1024
+    augment: false
+    n_workers: 2
+
+  test:
+    type: test
+    name: Osteosarcoma
+    mode: classification
+    image_dir: /home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/training_data_256_case68/images
+    label_map: /home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/dataset_split_256_case68.json
+    label_dir: /home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/training_data_256_case68/labels
+    height: 1024
+    width: 1024
+    batch_size: 256
+    balance: False
+    augment: False
+
+path:
+  # pretrain_model: /mnt/disk4/nmduong/Vin-Uni-Bone-Tumor/pretrained/mobilenet/mobilenetv2_1.0-0c6065bc.pth
+  # pretrain_model: /home/admin/duongnguyen/BoneTumor/src/weights/small_orig.pt
+  # pretrain_model: /mnt/disk1/nmduong/Vin-Uni-Bone-Tumor/BoneTumor/src/exp_segment/UNI/_best.pt
+  # pretrain_model: /mnt/disk1/nmduong/Vin-Uni-Bone-Tumor/BoneTumor/src/exp_cls_256_cls/UNI_lora_cls/_best.pt
+  # pretrain_model: ~
+  pretrain_model: /home/user01/aiotlab/nmduong/BoneTumor/src/exp_cls_256_cls_retrain_with9_case68/UNI_lora_cls/_last.pt
+
+train:
+  lr_G: !!float 5e-6
+  beta1: 0.9
+  beta2: 0.99
+  epochs: 10
+  eta_min: !!float 1e-7
+
+  manual_seed: 2000
+  val_freq: 1
+  val_step_freq: 1000
+
+  mode: classification
+
+logger:
+  print_freq: 20000
+  save_checkpoint_freq: !!float 20000
+
+is_train: true
+is_test: false
+wandb: true

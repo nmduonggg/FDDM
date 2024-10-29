@@ -1,0 +1,76 @@
+name: UNI_lora
+gpu_ids: [0]
+job_dir: exp_segment_256_focal
+token: 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
+
+network_G:
+  which_model_G: uni_lora
+  in_nc: 3
+  out_nc: 7
+
+datasets:
+  train:
+    type: train
+    name: Osteosarcoma
+    mode: segment
+    image_dir: ../RAW/REAL_WSIs/training_data_256/images
+    label_map: ../RAW/REAL_WSIs/dataset_split_256.json
+    label_dir: ../RAW/REAL_WSIs/training_data_256/labels
+    height: 1024
+    width: 1024
+    batch_size: 8
+    balance: False
+    augment: true
+    n_workers: 2
+
+  valid:
+    type: valid
+    name: Osteosarcoma
+    mode: segment
+    image_dir: ../RAW/REAL_WSIs/training_data_256/images
+    label_map: ../RAW/REAL_WSIs/dataset_split_256.json
+    label_dir: ../RAW/REAL_WSIs/training_data_256/labels
+    height: 1024
+    width: 1024
+    batch_size: 64
+    augment: false
+    n_workers: 2
+
+  test:
+    type: test
+    name: Osteosarcoma
+    mode: segment
+    image_dir: ../RAW/REAL_WSIs/training_data_256/images
+    label_map: ../RAW/REAL_WSIs/dataset_split_256.json
+    label_dir: ../RAW/REAL_WSIs/training_data_256/labels
+    height: 1024
+    width: 1024
+    batch_size: 1
+    balance: False
+    augment: False
+
+path:
+  # pretrain_model: /mnt/disk4/nmduong/Vin-Uni-Bone-Tumor/pretrained/mobilenet/mobilenetv2_1.0-0c6065bc.pth
+  # pretrain_model: /home/admin/duongnguyen/BoneTumor/src/weights/small_orig.pt
+  # pretrain_model: /mnt/disk1/nmduong/Vin-Uni-Bone-Tumor/BoneTumor/src/exp_segment/UNI/_best.pt
+  pretrain_model: /mnt/disk1/nmduong/Vin-Uni-Bone-Tumor/BoneTumor/src/exp_segment_256_focal/UNI_lora/_best.pt
+  # pretrain_model: ~
+
+train:
+  lr_G: !!float 5e-4
+  beta1: 0.9
+  beta2: 0.99
+  epochs: 30
+  eta_min: !!float 1e-7
+
+  manual_seed: 2000
+  val_freq: 1
+  val_step_freq: 1000
+
+logger:
+  print_freq: 20000
+  save_checkpoint_freq: !!float 20000
+
+is_train: true
+is_test: true
+wandb: true

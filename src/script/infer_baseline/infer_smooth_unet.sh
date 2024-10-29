@@ -1,0 +1,9 @@
+python infer_smooth_segment.py \
+    -opt options/UNet_baseline.yml \
+    --weight_path '/home/manhduong/BoneTumor/src/weights/unet.pt' \
+    --labels_dir '/workdir/radish/manhduong/labels' \
+    --images_dir '/workdir/radish/manhduong/images' \
+    --outdir './infer/smooth_unet/' \
+    --crop_sz 2048 \
+    --step 1536 \
+    --small_sz 1792 \

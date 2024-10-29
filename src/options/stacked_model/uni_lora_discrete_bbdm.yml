@@ -1,0 +1,184 @@
+name: stacked_bbdm_discrete
+gpu_ids: [0]
+job_dir: exp_cls_256_cls_retrain_with9
+token: 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
+
+network_G:
+  which_model_G: discrete_stacked_bbdm
+  in_nc: 3
+  out_nc: 7
+
+datasets:
+  train:
+    type: train
+    name: Osteosarcoma
+    mode: classification
+    image_dir: ../RAW/REAL_WSIs/training_data_256/images
+    label_map: ../RAW/REAL_WSIs/dataset_split_256_by_class_retrain_with9.json
+    label_dir: ../RAW/REAL_WSIs/training_data_256/labels
+    height: 1024
+    width: 1024
+    batch_size: 256
+    balance: False
+    augment: true
+    n_workers: 2
+
+  valid:
+    type: valid
+    name: Osteosarcoma
+    mode: classification
+    image_dir: ../RAW/REAL_WSIs/training_data_256/images
+    label_map: ../RAW/REAL_WSIs/dataset_split_256_by_class_retrain_with9.json
+    label_dir: ../RAW/REAL_WSIs/training_data_256/labels
+    height: 1024
+    width: 1024
+    batch_size: 1024
+    augment: false
+    n_workers: 2
+
+  test:
+    type: test
+    name: Osteosarcoma
+    mode: classification
+    image_dir: ../RAW/REAL_WSIs/training_data_256/images
+    label_map: ../RAW/REAL_WSIs/dataset_split_256_by_class_retrain_with9.json
+    label_dir: ../RAW/REAL_WSIs/training_data_256/labels
+    height: 1024
+    width: 1024
+    batch_size: 64
+    balance: False
+    augment: False
+
+path:
+  # pretrain_model: /mnt/disk4/nmduong/Vin-Uni-Bone-Tumor/pretrained/mobilenet/mobilenetv2_1.0-0c6065bc.pth
+  # pretrain_model: /home/admin/duongnguyen/BoneTumor/src/weights/small_orig.pt
+  # pretrain_model: /mnt/disk1/nmduong/Vin-Uni-Bone-Tumor/BoneTumor/src/exp_segment/UNI/_best.pt
+  # pretrain_model: /mnt/disk1/nmduong/Vin-Uni-Bone-Tumor/BoneTumor/src/exp_cls_256_cls/UNI_lora_cls/_best.pt
+  pretrain_model: /mnt/disk4/nmduong/Vin-Uni-Bone-Tumor/BoneTumor/src/exp/UNI_lora_cls
+  # pretrain_model: ~
+
+train:
+  lr_G: !!float 5e-4
+  beta1: 0.9
+  beta2: 0.99
+  epochs: 30
+  eta_min: !!float 1e-7
+
+  manual_seed: 2000
+  val_freq: 1
+  val_step_freq: 1000
+
+  mode: classification
+
+logger:
+  print_freq: 20000
+  save_checkpoint_freq: !!float 20000
+
+###---------------------------------------###
+
+# Brownian Bridge Diffusion Model Template(Pixel Space)
+bbdm:
+  runner: "BBDMRunner_PathologyDiscrete"
+  training:
+    n_epochs: 200
+    n_steps: 400000
+    save_interval: 1
+    sample_interval: 1
+    validation_interval: 1
+    accumulate_grad_batches: 2
+    wandb: True
+    wandb_key: '60fd0a73c2aefc531fa6a3ad0d689e3a4507f51c'
+
+  testing:
+    clip_denoised: False
+    sample_num: 1
+
+  data:
+    dataset_name: 'PredIm-1-ysubx-concat-with9-discrete'
+    dataset_type: 'custom_aligned_refine_concat_discrete_vector'
+    dataset_config:
+      dataset_path: '/home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/_DENOISE2/'
+      image_size: 64
+      channels: 7
+      to_normal: True
+      flip: False
+    train:
+      batch_size: 128
+      shuffle: True
+    val:
+      batch_size: 2
+      shuffle: True
+    test:
+      batch_size: 8
+      # shuffle: False
+
+  model:
+    model_name: "BrownianBridge-Pathology" # part of result path
+    model_type: "BBDM-Pathology" # specify a module
+    latent_before_quant_conv: False
+    normalize_latent: False
+    only_load_latent_mean_std: False
+    # model_load_path: "/mnt/disk4/nmduong/Vin-Uni-Bone-Tumor/BoneTumor/BBDM2/results/PredIm-1-ysubx-concat-with9-discrete/BrownianBridge-Pathology/checkpoint/top_model_epoch_3.pth" # model checkpoint path
+    # optim_sche_load_path:  # optimizer scheduler checkpoint path
+
+    EMA:
+      use_ema: True
+      ema_decay: 0.995
+      update_ema_interval: 8 # step
+      start_ema_step: 30000
+
+    CondStageParams:
+      n_stages: 0
+      in_channels: 10
+      out_channels: 3
+
+    BB:
+      optimizer:
+        weight_decay: 0.000
+        optimizer: 'Adam'
+        lr: 3.e-4
+        beta1: 0.9
+
+      lr_scheduler:
+        factor: 0.5
+        patience: 3000
+        threshold: 0.0001
+        cooldown: 3000
+        min_lr: 5.e-7
+
+      params:
+        mt_type: 'linear' # options {'linear', 'sin'}
+        objective: 'grad' # options {'grad', 'noise', 'ysubx'}
+        loss_type: 'l1' # options {'l1', 'l2'}
+
+        skip_sample: True
+        sample_type: 'linear' # options {"linear", "sin"}
+        sample_step: 20
+
+        num_timesteps: 1000 # timesteps
+        eta: 0.0 # DDIM reverse process eta
+        max_var: 0.5 # maximum variance
+
+        UNetParams:
+          image_size: 64
+          in_channels: 17
+          model_channels: 128
+          out_channels: 7
+          num_res_blocks: 2
+          attention_resolutions: !!python/tuple
+            - 32
+            - 16
+            - 8
+          channel_mult: !!python/tuple
+            - 1
+            - 4
+            - 8
+          conv_resample: True
+          dims: 2
+          num_heads: 8
+          num_head_channels: 64
+          use_scale_shift_norm: True
+          resblock_updown: True
+          use_spatial_transformer: True
+          context_dim: 10
+          condition_key: "SpatialRescaler" # options {"SpatialRescaler", "first_stage", "nocond"}

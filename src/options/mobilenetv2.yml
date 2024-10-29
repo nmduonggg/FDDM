@@ -1,0 +1,68 @@
+name: MobileNetV2
+gpu_ids: [0]
+job_dir: exp
+
+network_G:
+  which_model_G: mobilenetv2
+  in_nc: 3
+  out_nc: 3
+
+datasets:
+  train:
+    name: PKG-UT
+    mode: base
+    image_dir: ../RAW/PKG_Osteosarcoma_Tumor_Assessment/Images
+    label_map: ../RAW/PKG_Osteosarcoma_Tumor_Assessment/train_mapping.csv
+    use_shuffle: true
+    n_workers: 4
+    batch_size: 4
+    use_flip: true
+    use_rot: true
+    color: RGB
+    height: 1024
+    width: 1024
+    balance: True
+    augment: True
+
+  valid:
+    name: PKG-UT
+    mode: base
+    image_dir: ../RAW/PKG_Osteosarcoma_Tumor_Assessment/Images
+    label_map: ../RAW/PKG_Osteosarcoma_Tumor_Assessment/valid_mapping.csv
+    height: 1024
+    width: 1024
+    batch_size: 4
+    balance: False
+    augment: False
+
+  test:
+    name: PKG-UT
+    mode: base
+    image_dir: ../RAW/PKG_Osteosarcoma_Tumor_Assessment/Images
+    label_map: ../RAW/PKG_Osteosarcoma_Tumor_Assessment/test_mapping.csv
+    height: 1024
+    width: 1024
+    batch_size: 4
+    balance: False
+    augment: False
+
+path:
+  # pretrain_model: /mnt/disk4/nmduong/Vin-Uni-Bone-Tumor/pretrained/mobilenet/mobilenetv2_1.0-0c6065bc.pth
+  pretrain_model: /mnt/disk4/nmduong/Vin-Uni-Bone-Tumor/src/exp/MobileNetV2/_best.pt
+
+train:
+  lr_G: !!float 3e-5
+  beta1: 0.9
+  beta2: 0.99
+  epochs: 300
+  eta_min: !!float 1e-7
+
+  manual_seed: 2000
+  val_freq: 1
+
+logger:
+  print_freq: 20000
+  save_checkpoint_freq: !!float 20000
+
+is_train: False
+is_test: True

@@ -1,0 +1,71 @@
+name: Transformer_Reorder
+gpu_ids: [0]
+job_dir: exp_reorder_transformer_phase2
+token: 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
+
+network_G:
+  which_model_G: transformer_reorder
+  in_nc: 3
+  out_nc: 7
+
+datasets:
+  train:
+    type: train
+    name: Osteosarcoma
+    mode: reorder
+    data_dir: /mnt/disk1/nmduong/Vin-Uni-Bone-Tumor/BoneTumor/RAW/REAL_WSIs/phase2_training_data/_VECTORS
+    height: 1024
+    width: 1024
+    batch_size: 32
+    balance: False
+    augment: true
+    n_workers: 2
+    max_length: 256
+
+  valid:
+    type: valid
+    name: Osteosarcoma
+    mode: reorder
+    data_dir: /mnt/disk1/nmduong/Vin-Uni-Bone-Tumor/BoneTumor/RAW/REAL_WSIs/phase2_training_data/_VECTORS
+    height: 1024
+    width: 1024
+    batch_size: 32
+    augment: false
+    n_workers: 2
+    max_length: 256
+
+  test:
+    type: test
+    name: Osteosarcoma
+    mode: reorder
+    data_dir: /mnt/disk1/nmduong/Vin-Uni-Bone-Tumor/BoneTumor/RAW/REAL_WSIs/phase2_training_data/_VECTORS
+    height: 1024
+    width: 1024
+    batch_size: 1
+    balance: False
+    augment: False
+    max_length: 256
+
+path:
+  pretrain_model: ~
+
+train:
+  lr_G: !!float 5e-4
+  beta1: 0.9
+  beta2: 0.99
+  epochs: 30
+  eta_min: !!float 1e-7
+
+  manual_seed: 2000
+  val_freq: 1
+  val_step_freq: 1000
+
+  mode: reorder
+
+logger:
+  print_freq: 20000
+  save_checkpoint_freq: !!float 20000
+
+is_train: true
+is_test: false
+wandb: false

@@ -1,0 +1,77 @@
+name: unet
+gpu_ids: [0]
+job_dir: exp_segment
+token: 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
+
+network_G:
+  which_model_G: unet_baseline
+  in_nc: 3
+  out_nc: 7
+
+datasets:
+  train:
+    type: train
+    name: Osteosarcoma
+    mode: segment
+    image_dir: '/home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/_DENOISE2/images'
+    root: '/home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/_DENOISE2/'
+    label_dir: '/home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/_DENOISE2/label'
+    height: 1024
+    width: 1024
+    batch_size: 64
+    balance: False
+    augment: False
+    n_workers: 20
+
+  valid:
+    type: valid
+    name: Osteosarcoma
+    mode: segment
+    image_dir: '/home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/_DENOISE2/images'
+    root: '/home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/_DENOISE2/'
+    label_dir: '/home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/_DENOISE2/label'
+    height: 1024
+    width: 1024
+    balance: False
+    augment: False
+    batch_size: 256
+    n_workers: 20
+
+  test:
+    type: test
+    name: Osteosarcoma
+    mode: segment
+    image_dir: '/home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/_DENOISE2/images'
+    root: '/home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/_DENOISE2/'
+    label_dir: '/home/user01/aiotlab/nmduong/BoneTumor/RAW/REAL_WSIs/_DENOISE2/label'
+    height: 1024
+    width: 1024
+    batch_size: 1
+    balance: False
+    augment: False
+
+path:
+  # pretrain_model: /mnt/disk4/nmduong/Vin-Uni-Bone-Tumor/pretrained/mobilenet/mobilenetv2_1.0-0c6065bc.pth
+  # pretrain_model: /home/admin/duongnguyen/BoneTumor/src/weights/small_orig.pt
+  pretrain_model: /home/user01/aiotlab/nmduong/BoneTumor/src/exp_segment/unet/_best.pt
+
+train:
+  lr_G: !!float 1e-4
+  beta1: 0.9
+  beta2: 0.99
+  epochs: 30
+  eta_min: !!float 1e-7
+
+  manual_seed: 2000
+  val_freq: 1
+  val_step_freq: 1000
+
+  mode: segment
+
+logger:
+  print_freq: 20000
+  save_checkpoint_freq: !!float 20000
+
+is_train: true
+is_test: false
+wandb: true

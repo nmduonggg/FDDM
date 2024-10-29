@@ -1,0 +1,13 @@
+matplotlib
+numpy
+pandas
+loralib
+Pillow
+scikit-image
+opencv-python
+tqdm
+wandb
+transformers
+timm
+peft
+huggingface_hub
